@@ -1,0 +1,15 @@
+%%% -*- erlang -*-
+%%% 
+%%% This file is part of couchapp_legacy released under the MIT license.  
+%%% See the NOTICE for more information.
+
+
+
+{application, couchapp_legacy,
+ [{description, "CouchApp Legacy"},
+  {vsn, "0.01"},
+  {modules, []},
+  {registered, []},
+  {applications, [kernel, stdlib, ibrowse]},
+  {env, []}
+]}.
