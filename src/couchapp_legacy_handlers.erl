@@ -53,12 +53,10 @@ proxy_handler(Req, Path, Options) ->
         undefined ->
             throw({error, no_proxy_dest});
         ProxyDest ->
-            BaseUrl = case mochiweb_util:partition(ProxyDest, "/") of
-                {[], "/", _} -> couch_httpd:absolute_uri(Req, ProxyDest);
-                _ -> ProxyDest
-            end,
-            Url = couchap_legacy_util:remove_trailing_slash(BaseUrl) ++ Path,
-            couchap_legacy_proxy:do_proxy(Req, ProxyDest, Url)
+            ProxyDest1 = couchapp_legacy_util:remove_trailing_slash(
+                binary_to_list(ProxyDest)),
+            Url = couchapp_legacy_util:join_url_path(ProxyDest1, Path),
+            couchapp_legacy_proxy:do_proxy(Req, ProxyDest1, Url)
     end.
 
 
