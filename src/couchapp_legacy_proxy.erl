@@ -18,7 +18,7 @@
 do_proxy(Req, ProxyDest, Url) ->
     Method = get_method(Req),
     Version = get_version(Req),
-    Headers = get_headers(Req),
+    Headers = get_headers(Req, Url),
     Body = get_body(Req),
     Options = [
         {http_vsn, Version},
@@ -47,8 +47,21 @@ get_version(#httpd{mochi_req=MochiReq}) ->
     MochiReq:get(version).
 
 
-get_headers(#httpd{mochi_req=MochiReq}) ->
-    to_ibrowse_headers(mochiweb_headers:to_list(MochiReq:get(headers)), []).
+get_headers(#httpd{mochi_req=MochiReq}, Url) ->
+    Headers = proxy_headers(MochiReq, Url),
+    to_ibrowse_headers(Headers, []).
+
+proxy_headers(MochiReq, Url) ->
+    Hdrs = MochiReq:get(headers),
+    #url{host=Host, port=Port} = ibrowse_lib:parse_url(Url),
+    RemoteAddr = MochiReq:get(peer),
+    % set default proxy headers, useful for oauth & co
+	ProxyHeaders = [{"X-Forwarded-For", RemoteAddr}],
+	% rewrite headers
+    Hdrs1 = mochiweb_headers:enter("Host", lists:append([Host, ":",
+                integer_to_list(Port)]), Hdrs),
+    Hdrs2 = mochiweb_headers:default_from_list(ProxyHeaders, Hdrs1),
+    mochiweb_headers:to_list(Hdrs2).
 
 to_ibrowse_headers([], Acc) ->
     lists:reverse(Acc);
@@ -356,5 +369,4 @@ content_length([{K, V} | Rest]) ->
         _ ->
             content_length(Rest)
     end.
-
 
