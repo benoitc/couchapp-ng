@@ -1,0 +1,36 @@
+[
+{
+    "from": "^/blog/(?<post_no>\\w*)$",
+    "to": "/_show/post/(?<post_no>)"
+},
+{    
+    "from": "^/about$", 
+    "to": "about.html",
+    "type": "attachments"
+},
+{
+    "from": "/page/:page",
+    "to": "/_show/post/:page",
+    "options": {
+        "patterns": {
+            "page": "\\w*"
+        }
+    }
+},
+{
+    "from": "/(?<func>\\w*)-(?<name>\\w*)/(?<post_no>\\w*)$",
+    "to": "/_(?<func>)/(?<name>)/(?<post_no>)"
+    
+},
+{
+    "from": "^/$",
+    "to": "index.html"
+},
+{
+    "from": "^/blah",
+    "to": "index.html"
+},
+{
+    "from": "^/index.html$"
+}
+]
