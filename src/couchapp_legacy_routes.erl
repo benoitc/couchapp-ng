@@ -114,7 +114,6 @@ handle_call(_Msg, _From, State) ->
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
-
 handle_info(_Msg, State) ->
     {noreply, State}.
 
@@ -211,12 +210,23 @@ preprocess({Route}) ->
             {ok, Options} = check_options(couch_util:get_value(<<"options">>,
                     Route, {[]})),
 
-            RouteString1 = reverse_route(RouteString, Options),
-            DestString1 = reverse_alias(DestString, Options),
+            Options1 = case proplists:get_value(query_patterns, Options) of
+                undefined -> Options;
+                {Patterns} ->
+                    Patterns1 = lists:foldr(fun({K, V}, Acc) ->
+                                V1 = reverse_alias(V, Options),
+                                [{K, V1}|Acc]
+                        end,[], Patterns),
+
+                    [{query_substitute, Patterns1}|Options]
+            end,
+                    
+            RouteString1 = reverse_route(RouteString, Options1),
+            DestString1 = reverse_alias(DestString, Options1),
 
             
             {Type, Method, RouteString1, DestString1, binary_to_list(Handler),
-                Options}
+                Options1}
     end.
 
 reverse_route(RouteString, Options) ->

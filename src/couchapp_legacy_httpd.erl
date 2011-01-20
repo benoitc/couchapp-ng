@@ -55,15 +55,30 @@ process({attachment, _, _, enoent, _, _}, Req, Path, Prefix) ->
 process({attachment, _, _, Path, _, _}, Req, _, Prefix) ->
     couchapp_legacy_handlers:rewrite_handler(Req, Path, [{prefix,
                 Prefix}]);
-process({route, _, _, _, Handler, Opts}, Req, Path, Prefix) ->
+process({route, _, Regexp, Route, Handler, Opts}, Req, Path, Prefix) ->
+    % add extra query
+    QueryList = couch_httpd:qs(Req),
+    Substitutions = proplists:get_value(substitutions, Opts, []),
+    ExtraQuery = maybe_extra_query(Opts, fun(Patterns) ->
+                Substitutions1 = case re:run(Route, Regexp,[{capture,
+                                Substitutions, list}]) of
+                    match ->
+                        QueryList;
+                    {match, Matched} ->
+                        lists:append(lists:zip(Substitutions, Matched),
+                            QueryList) 
+                end,
+                substitute_query(Substitutions1, Patterns)
+        end),
+
     HandlerFun = get_handler_fun(Handler),
-    HandlerFun(Req, Path, [{prefix, Prefix}|Opts]);
+    HandlerFun(Req, Path, [{prefix, Prefix}, {extra_query, ExtraQuery}|Opts]);
 process({alias, _, RegExp, To, Handler, Opts}, Req, Path, Prefix) ->
     QueryList = couch_httpd:qs(Req),    
-    Path1 = substitute_alias(Path, RegExp, To, 
-        proplists:get_value(substitutions, Opts, []), QueryList),
+    {Path1, Opts1} = substitute_alias(Path, RegExp, To, 
+        proplists:get_value(substitutions, Opts, []), QueryList, Opts),
     HandlerFun = get_handler_fun(Handler),
-    HandlerFun(Req, Path1, [{prefix, Prefix}|Opts]);
+    HandlerFun(Req, Path1, [{prefix, Prefix}|Opts1]);
 process(nomatch, Req, _, _) ->
     couch_httpd:send_error(Req, 404, <<"nomatch">>,
                 <<"no route found">>).
@@ -111,20 +126,45 @@ selector_exec(Element, Regexp, Opts) ->
 	    end
     end.
 
-substitute_alias(URL, Regexp, Target0, Substitutions, QueryList) ->
-    case re:run(URL, Regexp, [{capture, Substitutions, list}]) of
+substitute_alias(URL, Regexp, Target0, Substitutions, QueryList, Options) ->
+    {Target1, FinalSubstitutions} = case re:run(URL, Regexp, 
+            [{capture, Substitutions, list}]) of
 	match ->
-        replace_substitions(QueryList, Target0);
+        {replace_substitions(QueryList, Target0), QueryList};
 	{match, Matched} ->
         Substitutions1 = lists:append(lists:zip(Substitutions, Matched),
             QueryList),
-	    replace_substitions(Substitutions1, Target0) 
+
+        {replace_substitions(Substitutions1, Target0), Substitutions1}
+    end,
+    ExtraQuery = maybe_extra_query(Options, fun(Patterns) ->
+                    substitute_query(FinalSubstitutions, Patterns)
+            end), 
+    {Target1, [{extra_query, ExtraQuery}|Options]}.
+
+
+maybe_extra_query(Options, Fun) ->
+    case proplists:get_value(query_substitute, Options) of
+        undefined ->
+            [];
+        Patterns ->
+            ?LOG_INFO("patterns ~p~n", [Patterns]),
+            Fun(Patterns)
     end.
 
 
+substitute_query(Substitutions, Patterns) ->
+    lists:foldr(fun({K,V}, Acc) ->
+                V1 = replace_substitions(Substitutions, V),
+                if V1 =:= V
+                    -> Acc;
+                    true -> [{K, V1}|Acc]
+                end
+        end, [], Patterns).
+
 replace_substitions(Substitutions, Target) ->
-    lists:foldl(fun({Name, Replacement}, Target) ->
-				re:replace(Target, "\\(\\?<" ++ Name ++ ">\\)", 
+    lists:foldl(fun({Name, Replacement}, String) ->
+				re:replace(String, "\\(\\?<" ++ Name ++ ">\\)", 
 					   Replacement, [{return, list}])
 			end, Target, Substitutions).
 

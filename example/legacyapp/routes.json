@@ -29,6 +29,19 @@
 },
 
 {
+    "from": "^/test/(?<lang>\\w+)/(?<post_no>\\w*)$",
+    "to": "/_show/post/(?<post_no>)",
+    "options": {
+
+        "query_patterns": {
+            "lang": "(?<lang>)"
+        }
+    }
+    
+},
+
+
+{
     "from": "^/$",
     "to": "index.html"
 },
@@ -38,5 +51,14 @@
 },
 {
     "from": "^/index.html$"
+},
+
+{
+    "from": "^/friendpaste(?<path>\\w*)$",
+    "to": "/(?<path>)",
+    "type": "proxy",
+    "options": {
+        "proxy_dest": "http://friendpaste.com/"
+    }
 }
 ]

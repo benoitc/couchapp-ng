@@ -6,7 +6,6 @@
 -module(couchapp_legacy_util).
 
 -export([normalize_path/1, 
-        encode_query/1, 
         remove_trailing_slash/1,
         quote_plus/1,
         join_url_path/2,
@@ -17,23 +16,6 @@
 normalize_path(Path)  ->
     string:join(normalize_path1(string:tokens(Path,
                 "/"), []), [$\/]).
-
-%% @doc  eencode query values & keys
-encode_query(Props) -> 
-    Props1 = lists:foldl(fun ({{bind, K}, V}, Acc) ->
-        case K of
-            <<"*">> -> Acc;
-            _ ->
-                V1 = case is_list(V) orelse is_binary(V) of
-                    true -> V;
-                    false ->
-                        % probably it's a number
-                        quote_plus(V)
-                end,
-                [{K, V1} | Acc]
-        end
-    end, [], Props),
-    lists:flatten(mochiweb_util:urlencode(Props1)).
 
 remove_trailing_slash(Url) ->
     rem_slash(lists:reverse(Url)).
