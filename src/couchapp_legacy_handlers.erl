@@ -9,23 +9,24 @@
 
 -export([rewrite_handler/3, proxy_handler/3]).
 
-rewrite_handler(#httpd{mochi_req=MochiReq}=Req, Path, Options) ->
+rewrite_handler(#httpd{mochi_req=MochiReq}=Req, Path, Options) ->    
+    % assemble path
+    Prefix = proplists:get_value(prefix, Options, ""),
+    Path1 = "/" ++ couchapp_legacy_util:normalize_path(
+        couchapp_legacy_util:join_url_path(Prefix, Path)
+    ),
+
     % get final query list
     QueryList = couch_httpd:qs(Req),
     ExtraQuery = proplists:get_value(extra_query, Options, []),
-    FinalQueryList = lists:append(QueryList, ExtraQuery),
 
+    FinalQueryList = fix_query(lists:append(QueryList, ExtraQuery)),
+    
     % build raw path
-    Prefix = proplists:get_value(prefix, Options, ""),
-    Path1 = lists:append([couchapp_legacy_util:join_url_path(Prefix, Path)], 
-        case FinalQueryList of
+    RawPath = lists:flatten(lists:append([Path1], case FinalQueryList of
             [] -> [];
-            _ -> [$?, couchapp_legacy_util:encode_query(FinalQueryList)]
-        end),
-
-    RawPath = binary_to_list(iolist_to_binary(
-                couchapp_legacy_util:normalize_path(Path1)
-            )),
+            _ -> [$?, mochiweb_util:urlencode(FinalQueryList)]
+        end)),
 
     ?LOG_INFO("Rewritten to ~p~n", [RawPath]),
     MochiReq1 = mochiweb_request:new(
@@ -59,4 +60,24 @@ proxy_handler(Req, Path, Options) ->
             couchapp_legacy_proxy:do_proxy(Req, ProxyDest1, Url)
     end.
 
+
+fix_query(QS) ->
+    fix_query(QS, []).
+
+fix_query([], Acc) ->
+    lists:reverse(Acc);
+fix_query([{K, V}|R], Acc) ->
+    Acc1 = case lists:member(K, ["key", "start_key", "end_key", "starkey",
+                "endkey"]) of
+        true ->
+            V1 = try iolist_to_binary(?JSON_ENCODE(?JSON_DECODE(V))) of
+                Value -> Value
+                catch
+                     _:_ ->
+                         iolist_to_binary(?JSON_ENCODE(iolist_to_binary(V)))                end,
+            [{K,V1}|Acc];
+        false ->
+            [{K, V}|Acc]
+    end,
+    fix_query(R, Acc1).
 

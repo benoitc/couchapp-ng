@@ -1,8 +1,13 @@
 [
 {
+    "from": "^/blog1",
+    "to": "/_show/post/(?<id>)"
+},
+{
     "from": "^/blog/(?<post_no>\\w*)$",
     "to": "/_show/post/(?<post_no>)"
 },
+
 {    
     "from": "^/about$", 
     "to": "about.html",
@@ -22,6 +27,7 @@
     "to": "/_(?<func>)/(?<name>)/(?<post_no>)"
     
 },
+
 {
     "from": "^/$",
     "to": "index.html"

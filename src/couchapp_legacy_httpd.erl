@@ -59,8 +59,9 @@ process({route, _, _, _, Handler, Opts}, Req, Path, Prefix) ->
     HandlerFun = get_handler_fun(Handler),
     HandlerFun(Req, Path, [{prefix, Prefix}|Opts]);
 process({alias, _, RegExp, To, Handler, Opts}, Req, Path, Prefix) ->
+    QueryList = couch_httpd:qs(Req),    
     Path1 = substitute_alias(Path, RegExp, To, 
-        proplists:get_value(substitutions, Opts, [])),
+        proplists:get_value(substitutions, Opts, []), QueryList),
     HandlerFun = get_handler_fun(Handler),
     HandlerFun(Req, Path1, [{prefix, Prefix}|Opts]);
 process(nomatch, Req, _, _) ->
@@ -110,16 +111,22 @@ selector_exec(Element, Regexp, Opts) ->
 	    end
     end.
 
-substitute_alias(URL, Regexp, Target0, Substitutions) ->
+substitute_alias(URL, Regexp, Target0, Substitutions, QueryList) ->
     case re:run(URL, Regexp, [{capture, Substitutions, list}]) of
 	match ->
-	    Target0;
+        replace_substitions(QueryList, Target0);
 	{match, Matched} ->
-	    lists:foldl(fun({Name, Replacement}, Target) ->
+        Substitutions1 = lists:append(lists:zip(Substitutions, Matched),
+            QueryList),
+	    replace_substitions(Substitutions1, Target0) 
+    end.
+
+
+replace_substitions(Substitutions, Target) ->
+    lists:foldl(fun({Name, Replacement}, Target) ->
 				re:replace(Target, "\\(\\?<" ++ Name ++ ">\\)", 
 					   Replacement, [{return, list}])
-			end, Target0, lists:zip(Substitutions, Matched))
-    end.
+			end, Target, Substitutions).
 
 get_handler_fun(Name) when is_binary(Name) ->
     get_handler_fun(binary_to_list(Name));
