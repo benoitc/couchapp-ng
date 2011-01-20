@@ -87,7 +87,7 @@ The couchapp_legacy rewriter allows you to pass any regexp to your rule
 or use the reversed dispatching currently use in default CouchDB
 rewriter.
 
-For example go on http://127.0.0.1:5984/testdb/_design/test/_app/
+For example go on http://127.0.0.1:5984/testdb/_design/legacyapp/_app/
 url. You will see the welcome page. This correspond to the rule::
 
     {
@@ -102,7 +102,7 @@ You can also do such rule::
             "to": "/_show/post/(?<post_no>)"
     }
 
-Go on http://127.0.0.1:5984/testdb/_design/test/_app/blog/test for
+Go on http://127.0.0.1:5984/testdb/_design/legacyapp/_app/blog/test for
 example to see the result. 
 
 Or more complex rule:
@@ -112,11 +112,11 @@ Or more complex rule:
         "to": "/_(?<func>)/(?<name>)/(?<post_no>)"
     }
 
-Url http://127.0.0.1:5984/testdb/_design/test/_app/show-post/test 
+Url http://127.0.0.1:5984/testdb/_design/legacyapp/_app/show-post/test 
 
 is rewritten to 
 
-http://127.0.0.1:5984/testdb/_design/test/_show/post/test
+http://127.0.0.1:5984/testdb/_design/legacyapp/_show/post/test
 
 Reverse url dispatching is working too::
 
@@ -130,11 +130,11 @@ Reverse url dispatching is working too::
         }
     }
 
-Url http://127.0.0.1:5984/testdb/_design/test/_app/page/test 
+Url http://127.0.0.1:5984/testdb/_design/legacyapp/_app/page/test 
 
 is rewritten to 
 
-http://127.0.0.1:5984/testdb/_design/test/_app/_show/post/test
+http://127.0.0.1:5984/testdb/_design/legacyapp/_app/_show/post/test
 
 Note that you need to fix patterns here to have reverse dispatching
 working, which is a litte different from default couchapp engine.
