@@ -1,13 +1,13 @@
 %%% -*- erlang -*-
 %%%
-%%% This file is part of couchapp_legacy released under the MIT license. 
+%%% This file is part of couchapp_ng released under the MIT license. 
 %%% See the NOTICE for more information.
 
-{erl_opts, [{i, "@COUCHDB_SRC@"}]}.
+{erl_opts, [{i, "@COUCHDB_SRC@/couchdb"}, {i, "@COUCHDB_SRC@/ibrowse"}]}.
 
 {deps, [
-    {ibrowse, ".*", {git, "git://github.com/benoitc/ibrowse.git", {branch,
-        "refuge"}}}
+    {emonk, ".*", {git, "git://github.com/benoitc/emonk.git", {branch,
+        "master"}}}
 ]}.
 
 {sub_dirs, [

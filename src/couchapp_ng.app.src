@@ -5,8 +5,8 @@
 
 
 
-{application, couchapp_legacy,
- [{description, "CouchApp Legacy"},
+{application, couchapp_ng,
+ [{description, "CouchApp Engine"},
   {vsn, "0.01"},
   {modules, []},
   {registered, []},

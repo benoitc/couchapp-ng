@@ -1,9 +1,9 @@
 %%% -*- erlang -*-
 %%%
-%%% This file is part of couchapp_legacy released under the MIT license. 
+%%% This file is part of couchapp_ng released under the MIT license. 
 %%% See the NOTICE for more information.
 
--module(couchapp_legacy_util).
+-module(couchapp_ng_util).
 
 -export([normalize_path/1, 
         remove_trailing_slash/1,

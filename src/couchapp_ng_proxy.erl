@@ -1,15 +1,15 @@
 %%% -*- erlang -*-
 %%%
-%%% This file is part of couchapp_legacy released under the MIT license. 
+%%% This file is part of couchapp_ng released under the MIT license. 
 %%% See the NOTICE for more information.
 
 
--module(couchapp_legacy_proxy).
+-module(couchapp_ng_proxy).
 
 -export([do_proxy/3]).
 
 -include("couch_db.hrl").
--include_lib("deps/ibrowse/include/ibrowse.hrl").
+-include("ibrowse.hrl").
 
 -define(TIMEOUT, infinity).
 -define(PKT_SIZE, 4096).
@@ -311,13 +311,13 @@ rewrite_location(Source, #url{host=Host, port=Port, protocol=Proto}, Url) ->
                 protocol=Source#url.protocol,
                 host=Source#url.host,
                 port=Source#url.port,
-                path=couchapp_legacy_util:join_url_path(Source#url.path, Location#url.path)
+                path=couchapp_ng_util:join_url_path(Source#url.path, Location#url.path)
             },
             url_to_url(DestLoc);
         #url{} ->
             Url;
         _ ->
-            url_to_url(Source#url{path=couchapp_legacy_util:join_url_path(Source#url.path, Url)})
+            url_to_url(Source#url{path=couchapp_ng_util:join_url_path(Source#url.path, Url)})
     end.
 
 

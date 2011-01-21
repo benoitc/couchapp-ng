@@ -1,9 +1,9 @@
 %%% -*- erlang -*-
 %%%
-%%% This file is part of couchapp_legacy released under the MIT license. 
+%%% This file is part of couchapp_ng released under the MIT license. 
 %%% See the NOTICE for more information.
 
--module(couchapp_legacy_handlers).
+-module(couchapp_ng_handlers).
 
 -include("couch_db.hrl").
 
@@ -12,8 +12,8 @@
 rewrite_handler(#httpd{mochi_req=MochiReq}=Req, Path, Options) ->    
     % assemble path
     Prefix = proplists:get_value(prefix, Options, ""),
-    Path1 = "/" ++ couchapp_legacy_util:normalize_path(
-        couchapp_legacy_util:join_url_path(Prefix, Path)
+    Path1 = "/" ++ couchapp_ng_util:normalize_path(
+        couchapp_ng_util:join_url_path(Prefix, Path)
     ),
 
     % build raw path
@@ -45,15 +45,15 @@ proxy_handler(Req, Path, Options) ->
         undefined ->
             throw({error, no_proxy_dest});
         ProxyDest ->
-            ProxyDest1 = couchapp_legacy_util:remove_trailing_slash(
+            ProxyDest1 = couchapp_ng_util:remove_trailing_slash(
                 binary_to_list(ProxyDest)),
-            Url = couchapp_legacy_util:join_url_path(ProxyDest1, Path),
+            Url = couchapp_ng_util:join_url_path(ProxyDest1, Path),
             
             % build raw path
             Url1 = build_raw_path(Req, Url, Options),
             ?LOG_DEBUG("Proxy To: ~p~nP", [Url1]),
 
-            couchapp_legacy_proxy:do_proxy(Req, ProxyDest1, Url1)
+            couchapp_ng_proxy:do_proxy(Req, ProxyDest1, Url1)
     end.
 
 

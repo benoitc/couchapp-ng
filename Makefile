@@ -1,7 +1,7 @@
-# This file is part of couchapp_legacy released under the MIT license. 
+# This file is part of couchapp_ng released under the MIT license. 
 # See the NOTICE for more information.
 
-COUCHDB_SRC ?= "../couchdb/src/couchdb"
+COUCHDB_SRC ?= "../couchdb/src"
 
 .PHONY: deps couchdb_src
 

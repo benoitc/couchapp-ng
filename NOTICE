@@ -1,4 +1,4 @@
-couchapp_legacy
+couchapp_ng
 ---------------
 
 2011 (c) Benoît Chesneau <benoitc@e-engura.org>
@@ -6,7 +6,7 @@ couchapp_legacy
 applounge is released under the MIT license. See the LICENSE file for the complete license.
 
 
-couchapp_legacy_proxy.erl
+couchapp_ng_proxy.erl
 -------------------------
 Apache CouchDB
 Copyright 2009 The Apache Software Foundation

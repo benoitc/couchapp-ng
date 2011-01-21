@@ -1,9 +1,9 @@
 %%% -*- erlang -*-
 %%%
-%%% This file is part of couchapp_legacy released under the MIT license. 
+%%% This file is part of couchapp_ng released under the MIT license. 
 %%% See the NOTICE for more information.
 
--module(couchapp_legacy_routes).
+-module(couchapp_ng_routes).
 -behaviour(gen_server).
 
 -include("couch_db.hrl").
@@ -26,7 +26,7 @@
     db_notifier 
 }).
 
-config_change("couchapp_legacy_handler") ->
+config_change("couchapp_ng_handler") ->
     exit(?MODULE, shutdown).
 
 load_routes(DbName, DocId, DDoc) ->
@@ -287,6 +287,6 @@ check_options({Options}) ->
 check_options([], Acc) ->
     {ok, Acc};
 check_options([{K, V}|Rest], Acc) when is_binary(K)->
-    check_options(Rest, [{couchapp_legacy_util:to_atom(K), V}|Acc]);
+    check_options(Rest, [{couchapp_ng_util:to_atom(K), V}|Acc]);
 check_options(_, _) ->
     throw({error, invalid_route_option}).

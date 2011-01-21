@@ -1,7 +1,7 @@
 About
 -----
 
-couchapp_legacy is a a new CouchApp engine for CouchDB.
+couchapp_ng is a a new CouchApp engine for CouchDB.
 
 Install
 -------
@@ -17,27 +17,27 @@ can also change the path of couchdb installation by passing the path to
 (note during development you can use *make dev* command).
 
 
-Add couch_zmq_pubsub server to couch configuration file *local_dev.ini*
+Add couch_ng_server server to couch configuration file *local_dev.ini*
 (or in production local.ini) and edit the following section::
 
     [daemons]
-    couchapp_legacy_routes={couchapp_legacy_routes, start_link, []}
+    couchapp_ng_routes={couchapp_ng_routes, start_link, []}
 
     [httpd_design_handlers]
-    _app = {couchapp_legacy_httpd, handle_app_req}
+    _app = {couchapp_ng_httpd, handle_app_req}
 
-    [couchapp_legacy_handlers]
-    rewrite = {couchapp_legacy_handlers, rewrite_handler}
-    proxy = {couchapp_legacy_handlers, proxy_handler}
+    [couchapp_ng_handlers]
+    rewrite = {couchapp_ng_handlers, rewrite_handler}
+    proxy = {couchapp_ng_handlers, proxy_handler}
 
 
 Start couchdb::
 
-    $ export $COUCHAPP_LEGACY=/path/to/couchapp_legacy
-    $ ERL_FLAGS="-pa $COUCHAPP_LEGACY/ebin -pa $COUCHAPP_LEGACY/deps/ibrowse/ebin" ./utils/run
+    $ export $COUCHAPP_LEGACY=/path/to/couchapp_ng
+    $ ERL_FLAGS="-pa $COUCHAPP_LEGACY/ebin" ./utils/run
     
 
-Now you can test the couchapp_legacy rewriter. First install `couchapp
+Now you can test the couchapp_ng rewriter. First install `couchapp
 <http://github.com/couchapp/couchapp>`_ then go in the
 examples/legacyapp folder and do::
 
@@ -83,7 +83,7 @@ in the routes property of your design documen::
         }
     ]
 
-The couchapp_legacy rewriter allows you to pass any regexp to your rule
+The couchapp_ng rewriter allows you to pass any regexp to your rule
 or use the reversed dispatching currently use in default CouchDB
 rewriter.
 

@@ -1,9 +1,9 @@
 %%% -*- erlang -*-
 %%%
-%%% This file is part of couchapp_legacy released under the MIT license. 
+%%% This file is part of couchapp_ng released under the MIT license. 
 %%% See the NOTICE for more information.
 
--module(couchapp_legacy_httpd).
+-module(couchapp_ng_httpd).
 
 -include("couch_db.hrl").
 
@@ -11,7 +11,7 @@
 
 -define(SEPARATOR, $\/).
 
-% @doc couchapp_legacy design handler
+% @doc couchapp_ng design handler
 handle_app_req(#httpd{
         path_parts=[DbName, <<"_design">>, DesignName, 
             _App|PathParts]}=Req, _db, DDoc) ->
@@ -27,7 +27,7 @@ handle_app_req(#httpd{
 
     ?LOG_DEBUG("rewrite against ~p~n", [Path]),
 
-    case couchapp_legacy_routes:load_routes(DbName, DesignId, DDoc) of
+    case couchapp_ng_routes:load_routes(DbName, DesignId, DDoc) of
         {error, undefined} ->
             couch_httpd:send_error(Req, 404, <<"couchapp_error">>,
                 <<"Routes not defined">>);
@@ -35,7 +35,7 @@ handle_app_req(#httpd{
             couch_httpd:send_error(Req, 400, <<"couchapp_error">>,
                 <<"Route property must be a JSON Array.">>);
         _Else ->
-            Routes = couchapp_legacy_routes:get_routes(Req, DbName,
+            Routes = couchapp_ng_routes:get_routes(Req, DbName,
                 DesignId),
             ?LOG_DEBUG("Available routes ~p~n", [Routes]),
             dispatch(Req, Routes, Path, Prefix)
@@ -50,10 +50,10 @@ dispatch(Req, Routes, Path, Prefix) ->
     process(Action, Req, Path, Prefix).
 
 process({attachment, _, _, enoent, _, _}, Req, Path, Prefix) ->
-    couchapp_legacy_handlers:rewrite_handler(Req, Path, [{prefix,
+    couchapp_ng_handlers:rewrite_handler(Req, Path, [{prefix,
                 Prefix}]);
 process({attachment, _, _, Path, _, _}, Req, _, Prefix) ->
-    couchapp_legacy_handlers:rewrite_handler(Req, Path, [{prefix,
+    couchapp_ng_handlers:rewrite_handler(Req, Path, [{prefix,
                 Prefix}]);
 process({route, _, Regexp, Route, Handler, Opts}, Req, Path, Prefix) ->
     % add extra query
@@ -183,4 +183,4 @@ handlers_funs() ->
     lists:map(
         fun({Name, SpecStr}) ->
                 {Name, couch_httpd:make_arity_3_fun(SpecStr)}
-        end, couch_config:get("couchapp_legacy_handlers")).
+        end, couch_config:get("couchapp_ng_handlers")).
